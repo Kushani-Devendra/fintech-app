@@ -1,7 +1,8 @@
 import Colors from "@/constants/Colors";
 import { defaultStyles } from "@/constants/Styles";
+import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   View,
@@ -11,6 +12,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 
 enum SignInType {
@@ -24,9 +26,43 @@ const Login = () => {
   const [countryCode, setCountryCode] = useState("+94");
   const [phoneNumber, setPhoneNumber] = useState("");
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
+  const router = useRouter();
+  const { signIn } = useSignIn();
 
   const onSignIn = async (type: SignInType) => {
     if (type === SignInType.Phone) {
+      try {
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+        const { supportedFirstFactors } = await signIn!.create({
+          identifier: fullPhoneNumber,
+        });
+
+        const firstPhoneFactor: any = supportedFirstFactors?.find(
+          (factor: any) => {
+            return factor.strategy === "phone_code";
+          }
+        );
+
+        const { phoneNumberId } = firstPhoneFactor;
+
+        await signIn!.prepareFirstFactor({
+          strategy: "phone_code",
+          phoneNumberId,
+        });
+
+        router.push({
+          pathname: "/verify/[phone]",
+          params: { phone: fullPhoneNumber, signin: "true" },
+        });
+      } catch (err) {
+        console.log("error", JSON.stringify(err, null, 2));
+        if (isClerkAPIResponseError(err)) {
+          if (err.errors[0].code === "from_identifier_not_found") {
+            Alert.alert("Error", err.errors[0].message);
+          }
+        }
+      }
     }
   };
 
@@ -108,7 +144,7 @@ const Login = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => onSignIn(SignInType.Email)}
+          onPress={() => onSignIn(SignInType.Google)}
           style={[
             defaultStyles.pillButton,
             {
@@ -119,9 +155,27 @@ const Login = () => {
             },
           ]}
         >
-          <Ionicons name="google-logo" size={24} color={"#000"} />
+          <Ionicons name="logo-google" size={24} color={"#000"} />
           <Text style={[defaultStyles.buttonText, { color: "#000" }]}>
-            Continue with googlr
+            Continue with google
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => onSignIn(SignInType.Apple)}
+          style={[
+            defaultStyles.pillButton,
+            {
+              flexDirection: "row",
+              gap: 16,
+              marginTop: 20,
+              backgroundColor: "#fff",
+            },
+          ]}
+        >
+          <Ionicons name="logo-apple" size={24} color={"#000"} />
+          <Text style={[defaultStyles.buttonText, { color: "#000" }]}>
+            Continue with apple
           </Text>
         </TouchableOpacity>
       </View>
