@@ -1,20 +1,19 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import React, { Fragment, useEffect, useState } from "react";
-import { Link, useLocalSearchParams } from "expo-router";
+import Colors from "@/constants/Colors";
+import { defaultStyles } from "@/constants/Styles";
 import {
   isClerkAPIResponseError,
   useSignIn,
   useSignUp,
 } from "@clerk/clerk-expo";
-import { defaultStyles } from "@/constants/Styles";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { Fragment, useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-import Colors from "@/constants/Colors";
-
 const CELL_COUNT = 6;
 
 const Page = () => {
@@ -22,10 +21,10 @@ const Page = () => {
     phone: string;
     signin: string;
   }>();
-
   const [code, setCode] = useState("");
   const { signIn } = useSignIn();
   const { signUp, setActive } = useSignUp();
+  const router = useRouter();
 
   const ref = useBlurOnFulfill({ value: code, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -35,8 +34,6 @@ const Page = () => {
 
   useEffect(() => {
     if (code.length === 6) {
-      //   console.log("code", code);
-      // verify the code
       if (signin === "true") {
         verifySignIn();
       } else {
@@ -46,32 +43,40 @@ const Page = () => {
   }, [code]);
 
   const verifyCode = async () => {
-    try {
-      await signUp!.attemptPhoneNumberVerification({
-        code,
-      });
-      await setActive!({ session: signUp!.createdSessionId });
-    } catch (err) {
-      console.log("error", JSON.stringify(err, null, 2));
-      if (isClerkAPIResponseError(err)) {
-        Alert.alert("Error", err.errors[0].message);
-      }
-    }
+    router.push({
+      pathname: "/(authenticated)(tabs)home",
+      params: { phone: "" },
+    });
+    // try {
+    //   await signUp!.attemptPhoneNumberVerification({
+    //     code,
+    //   });
+    //   await setActive!({ session: signUp!.createdSessionId });
+    // } catch (err) {
+    //   console.log("error", JSON.stringify(err, null, 2));
+    //   if (isClerkAPIResponseError(err)) {
+    //     Alert.alert("Error", err.errors[0].message);
+    //   }
+    // }
   };
 
   const verifySignIn = async () => {
-    try {
-      await signIn!.attemptFirstFactor({
-        strategy: "phone_code",
-        code,
-      });
-      await setActive!({ session: signIn!.createdSessionId });
-    } catch (err) {
-      console.log("error", JSON.stringify(err, null, 2));
-      if (isClerkAPIResponseError(err)) {
-        Alert.alert("Error", err.errors[0].message);
-      }
-    }
+    router.push({
+      pathname: "/login",
+      params: { phone: "" },
+    });
+    // try {
+    //   await signIn!.attemptFirstFactor({
+    //     strategy: "phone_code",
+    //     code,
+    //   });
+    //   await setActive!({ session: signIn!.createdSessionId });
+    // } catch (err) {
+    //   console.log("error", JSON.stringify(err, null, 2));
+    //   if (isClerkAPIResponseError(err)) {
+    //     Alert.alert("Error", err.errors[0].message);
+    //   }
+    // }
   };
   return (
     <View style={defaultStyles.container}>
@@ -92,6 +97,7 @@ const Page = () => {
         renderCell={({ index, symbol, isFocused }) => (
           <Fragment key={index}>
             <View
+              // Make sure that you pass onLayout={getCellOnLayoutHandler(index)} prop to root component of "Cell"
               onLayout={getCellOnLayoutHandler(index)}
               key={index}
               style={[styles.cellRoot, isFocused && styles.focusCell]}
@@ -109,7 +115,7 @@ const Page = () => {
 
       <Link href={"/login"} replace asChild>
         <TouchableOpacity>
-          <Text style={defaultStyles.textLink}>
+          <Text style={[defaultStyles.textLink]}>
             Already have an account? Log in
           </Text>
         </TouchableOpacity>
@@ -120,16 +126,10 @@ const Page = () => {
 
 const styles = StyleSheet.create({
   codeFieldRoot: {
-    marginTop: 20,
-  },
-  cell: {
-    width: 40,
-    height: 40,
-    lineHeight: 38,
-    fontSize: 24,
-    borderWidth: 2,
-    borderColor: "#00000030",
-    textAlign: "center",
+    marginVertical: 20,
+    marginLeft: "auto",
+    marginRight: "auto",
+    gap: 12,
   },
   cellRoot: {
     width: 45,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   focusCell: {
-    borderColor: "#000",
+    paddingBottom: 8,
   },
   separator: {
     height: 2,
@@ -154,5 +154,4 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
-
 export default Page;

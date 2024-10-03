@@ -30,14 +30,14 @@ const Register = () => {
     //   await signUp!.create({
     //     phoneNumber: fullPhoneNumber,
     //   });
-    //   // signUp!.preparePhoneNumberVerification();
+    //   signUp!.preparePhoneNumberVerification();
 
     //   router.push({
     //     pathname: "/verify/[phone]",
     //     params: { phone: fullPhoneNumber },
     //   });
     // } catch (error) {
-    //   console.error("Error signing up:", error);
+    //   console.error("Error signing up:", JSON.stringify(error, null, 2));
     // }
   };
 
