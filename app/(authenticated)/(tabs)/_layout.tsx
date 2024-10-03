@@ -39,7 +39,7 @@ const Layout = () => {
         }}
       />
       <Tabs.Screen
-        name="crpto"
+        name="crypto"
         options={{
           title: "Crypto",
           tabBarIcon: ({ size, color }) => (
