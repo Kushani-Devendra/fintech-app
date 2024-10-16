@@ -12,10 +12,10 @@ type RoundBtnProps = {
 const RoundBtn = ({ icon, text, onPress }: RoundBtnProps) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <View style={styles.circle}>
+      <View style={styles.avatar}>
         <Ionicons name={icon} size={40} color={Colors.dark} />
       </View>
-      <Text>{text}</Text>
+      <Text style={styles.label}>{text}</Text>
     </TouchableOpacity>
   );
 };
@@ -25,13 +25,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  circle: {
+  avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: Colors.lightGray,
     justifyContent: "center",
     alignItems: "center",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: Colors.dark,
   },
 });
 

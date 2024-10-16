@@ -12,7 +12,7 @@ const Dropdown = () => {
         <DropdownMenu.Item key="statement">
           <DropdownMenu.ItemTitle>Statement</DropdownMenu.ItemTitle>
           <DropdownMenu.ItemIcon
-            android={{
+            ios={{
               name: "list.bullet.rectangle.fill",
               pointSize: 24,
             }}
